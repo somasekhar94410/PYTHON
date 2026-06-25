@@ -1,70 +1,54 @@
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import Qt
-import sys
-import math
+from tkinter import *
 
-class Calculator(QMainWindow):
-    def __init__(self):
-        super().__init__()
+root = Tk()
+root.title("991MS Calculator")
+root.geometry("400x600")
 
-        self.setWindowTitle("991MS Scientific Calculator")
-        self.setFixedSize(450, 700)
+exp = ""
 
-        self.display = QLineEdit()
-        self.display.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.display.setStyleSheet("""
-            font-size:28px;
-            padding:15px;
-            background:#f4f4f4;
-            border:2px solid black;
-        """)
+def press(num):
+    global exp
+    exp += str(num)
+    display.delete(0, END)
+    display.insert(END, exp)
 
-        layout = QGridLayout()
+def equal():
+    global exp
+    try:
+        result = str(eval(exp))
+        display.delete(0, END)
+        display.insert(END, result)
+        exp = result
+    except:
+        display.delete(0, END)
+        display.insert(END, "Error")
+        exp = ""
 
-        buttons = [
-            ['sin', 'cos', 'tan', 'log'],
-            ['√', 'x²', '(', ')'],
-            ['7', '8', '9', '/'],
-            ['4', '5', '6', '*'],
-            ['1', '2', '3', '-'],
-            ['0', '.', '=', '+']
-        ]
+def clear():
+    global exp
+    exp = ""
+    display.delete(0, END)
 
-        for r, row in enumerate(buttons):
-            for c, text in enumerate(row):
-                btn = QPushButton(text)
-                btn.setMinimumHeight(60)
-                btn.clicked.connect(self.button_clicked)
-                layout.addWidget(btn, r, c)
+display = Entry(root, font=("Arial", 24))
+display.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
 
-        widget = QWidget()
-        main = QVBoxLayout()
-        main.addWidget(self.display)
-        main.addLayout(layout)
-        widget.setLayout(main)
+buttons = [
+    ('7',1,0),('8',1,1),('9',1,2),('/',1,3),
+    ('4',2,0),('5',2,1),('6',2,2),('*',2,3),
+    ('1',3,0),('2',3,1),('3',3,2),('-',3,3),
+    ('0',4,0),('.',4,1),('=',4,2),('+',4,3)
+]
 
-        self.setCentralWidget(widget)
+for (text,row,col) in buttons:
+    if text == "=":
+        Button(root,text=text,width=8,height=3,
+               command=equal).grid(row=row,column=col)
+    else:
+        Button(root,text=text,width=8,height=3,
+               command=lambda t=text: press(t)
+               ).grid(row=row,column=col)
 
-    def button_clicked(self):
-        btn = self.sender().text()
+Button(root,text="AC",width=35,height=2,
+       command=clear).grid(row=5,column=0,columnspan=4)
 
-        if btn == '=':
-            try:
-                expr = self.display.text()
-                expr = expr.replace('√', 'math.sqrt')
-                expr = expr.replace('sin', 'math.sin')
-                expr = expr.replace('cos', 'math.cos')
-                expr = expr.replace('tan', 'math.tan')
-                expr = expr.replace('log', 'math.log10')
-                self.display.setText(str(eval(expr)))
-            except:
-                zself.display.setText("Error")
-        elif btn == 'x²':
-            self.display.insert('**2')
-        else:
-            self.display.insert(btn)
-
-app = QApplication(sys.argv)
-window = Calculator()
-window.show()
-sys.exit(app.exec())
+root.mainloop()
